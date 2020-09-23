@@ -23,7 +23,6 @@ namespace DrawTools
             this.OriginalCursor = Cursors.Arrow;
             this.squareCursor = false;
 
-            this.Pen = new Pen(this.Brush, this.StrokeThickness);
             this.SelectBackgroundPen = new Pen(Brushes.White, 1);
             this.SelectPen = new Pen(Brushes.Black, 1) { DashStyle = new DashStyle(new Double[] { 4 }, 0) };
 
@@ -97,9 +96,7 @@ namespace DrawTools
 
         private static void OnBrushPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            var drawing = (DrawingCanvas)d;
-            drawing.Pen.Brush = (SolidColorBrush)e.NewValue;
-            drawing.UpdateCursor();
+            ((DrawingCanvas)d).UpdateCursor();
         }
 
         /// <summary>
@@ -111,9 +108,7 @@ namespace DrawTools
 
         private static void OnStrokeThicknessPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            var drawing = (DrawingCanvas)d;
-            drawing.Pen.Thickness = (UInt32)e.NewValue;
-            drawing.UpdateCursor();
+            ((DrawingCanvas)d).UpdateCursor();
         }
 
         /// <summary>
@@ -521,7 +516,7 @@ namespace DrawTools
         /// <summary>
         /// 画笔
         /// </summary>
-        public Pen Pen { get; }
+        public Pen Pen => new Pen(this.Brush, this.StrokeThickness);
         /// <summary>
         /// 选择画笔
         /// </summary>
