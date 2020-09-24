@@ -85,15 +85,15 @@ namespace DrawTools
         {
             var start = startPoint.Value;
 
-            if ((start - point).Length < pen.Thickness)
+            if ((start - point).Length < this.drawingCanvas.StrokeThickness)
                 return true;
 
             var dc = this.RenderOpen();
 
             endPoint = point;
 
-            var x = Math.Abs(point.X - start.X) / dpi.Cm2WpfX * this.drawingCanvas.Zoom;
-            var y = Math.Abs(point.Y - start.Y) / dpi.Cm2Wpfy * this.drawingCanvas.Zoom;
+            var x = Math.Abs(point.X - start.X) / dpi.Cm2WpfX;
+            var y = Math.Abs(point.Y - start.Y) / dpi.Cm2Wpfy;
             var len = Math.Sqrt(x * x + y * y);
             var text = (len * 10).ToString("0.00") + "mm";
 
