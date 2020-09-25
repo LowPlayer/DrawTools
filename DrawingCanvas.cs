@@ -143,7 +143,8 @@ namespace DrawTools
 
         private static void OnZoomPropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ((DrawingCanvas)d).UpdateCursor();
+            if (!Double.IsNaN((Double)e.NewValue))
+                ((DrawingCanvas)d).UpdateCursor();
         }
 
         /// <summary>

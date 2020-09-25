@@ -23,7 +23,9 @@ namespace DrawTools
 
         private static void OnBackgroundImagePropertyChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            ((DrawingCanvasViewer)d).EnsureInnerSize();
+            var viewer = (DrawingCanvasViewer)d;
+            viewer.EnsureZoom();
+            viewer.EnsureInnerSize();
         }
 
         /// <summary>

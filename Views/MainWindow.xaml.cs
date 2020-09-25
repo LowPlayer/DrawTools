@@ -16,16 +16,15 @@ namespace DrawTools.Views
         public MainWindow()
         {
             InitializeComponent();
-            
+
             color_picker.SelectedColorChanged += delegate { this.drawCanvas.Brush = color_picker.SelectedBrush; btn_color.IsChecked = false; };
             color_picker.Canceled += delegate { btn_color.IsChecked = false; };
-
-            this.drawTools.AddHandler(RadioButton.CheckedEvent, new RoutedEventHandler(OnDrawToolChecked));
         }
 
         private void OnDrawToolChecked(Object sender, RoutedEventArgs e)
         {
-            drawCanvas.DrawingToolType = (DrawToolType)Enum.Parse(typeof(DrawToolType), (String)((RadioButton)e.Source).Tag);
+            if (e.Source is RadioButton btn && btn.Tag is String typeStr)
+                drawCanvas.DrawingToolType = (DrawToolType)Enum.Parse(typeof(DrawToolType), typeStr);
         }
 
         private void btn_clear_Click(object sender, RoutedEventArgs e)
