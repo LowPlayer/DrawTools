@@ -122,7 +122,7 @@ namespace DrawTools
 
                 if (area != 0)
                 {
-                    area = area / dpi.Cm2WpfX / dpi.Cm2Wpfy * 100;
+                    area = area / Dpi.Cm2Wpf / Dpi.Cm2Wpf * 100;
 
                     var text = area.ToString("0.00") + "mm²";
 

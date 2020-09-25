@@ -92,8 +92,8 @@ namespace DrawTools
 
             endPoint = point;
 
-            var x = Math.Abs(point.X - start.X) / dpi.Cm2WpfX;
-            var y = Math.Abs(point.Y - start.Y) / dpi.Cm2Wpfy;
+            var x = Math.Abs(point.X - start.X) / Dpi.Cm2Wpf;
+            var y = Math.Abs(point.Y - start.Y) / Dpi.Cm2Wpf;
             var len = Math.Sqrt(x * x + y * y);
             var text = (len * 10).ToString("0.00") + "mm";
 

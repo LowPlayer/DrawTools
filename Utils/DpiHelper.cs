@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Drawing;
+using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Media;
 
@@ -12,57 +13,9 @@ namespace DrawTools.Utils
             DpiX = x;
             DpiY = y;
 
-            Px2WpfX = PxToWpf(1, DpiX);
-            Px2WpfY = PxToWpf(1, DpiY);
-            Cm2WpfX = CmToPx(1, DpiX) * Px2WpfX;
-            Cm2Wpfy = CmToPx(1, DpiY) * Px2WpfY;
-            Pt2Wpfx = PtToPx(1, DpiX) * Px2WpfX;
-            Pt2Wpfy = PtToPx(1, DpiY) * Px2WpfY;
-            In2WpfX = InToPx(1, DpiX) * Px2WpfX;
-            In2WpfY = InToPx(1, DpiY) * Px2WpfY;
+            Px2WpfX = 96 / DpiX;
+            Px2WpfY = 96 / DpiY;
         }
-
-        #region 方法
-
-        /// <summary>
-        /// 厘米转像素
-        /// </summary>
-        public static Double CmToPx(Double length, Double dpi)
-        {
-            return length * dpi / 2.54;
-        }
-
-        public static Double PtToPx(Double length, Double dpi)
-        {
-            return length * dpi / 72;
-        }
-
-        public static Double WpfToPx(Double length, Double dpi)
-        {
-            return length / 96 * dpi;
-        }
-
-        public static Double PxToCm(Double length, Double dpi)
-        {
-            return length * 2.54 / dpi;
-        }
-
-        public static Double PxToPt(Double length, Double dpi)
-        {
-            return length * 72 / dpi;
-        }
-
-        public static Double PxToWpf(Double length, Double dpi)
-        {
-            return length / dpi * 96;
-        }
-
-        public static Double InToPx(Double length, Double dpi)
-        {
-            return length * dpi;
-        }
-
-        #endregion
 
         public Double DpiX { get; }
 
@@ -72,18 +25,6 @@ namespace DrawTools.Utils
 
         public Double Px2WpfY { get; }
 
-        public Double Cm2WpfX { get; }
-
-        public Double Cm2Wpfy { get; }
-
-        public Double Pt2Wpfx { get; }
-
-        public Double Pt2Wpfy { get; }
-
-        public Double In2WpfX { get; }
-
-        public Double In2WpfY { get; }
-
         /// <summary>
         /// 英寸-厘米
         /// </summary>
@@ -92,31 +33,60 @@ namespace DrawTools.Utils
         /// 英寸-磅
         /// </summary>
         public static readonly Double In2Pt = 72;
+        /// <summary>
+        /// 厘米-wpf
+        /// </summary>
+        public static readonly Double Cm2Wpf = 96 / 2.54;
     }
 
     public sealed class DpiHelper
     {
-        static DpiHelper()
+        #region Graphics
+
+        public static Dpi GetDpiByGraphics(IntPtr hWnd)
         {
-            using (var graphics = Graphics.FromHwnd(IntPtr.Zero))
+            using (var graphics = Graphics.FromHwnd(hWnd))
             {
-                dpi = new Dpi(graphics.DpiX, graphics.DpiY);
+                return new Dpi(graphics.DpiX, graphics.DpiY);
             }
-        }
-
-        #region 方法
-
-        public static Dpi GetDpiFromVisual(Visual visual)
-        {
-            var source = PresentationSource.FromVisual(visual);
-            return (source == null || source.CompositionTarget == null) ? dpi : new Dpi(96.0 * source.CompositionTarget.TransformToDevice.M11, 96.0 * source.CompositionTarget.TransformToDevice.M22);
         }
 
         #endregion
 
-        #region 字段
+        #region CompositionTarget
 
-        public static readonly Dpi dpi;
+        public static Dpi GetDpiFromVisual(Visual visual)
+        {
+            var source = PresentationSource.FromVisual(visual);
+            return (source == null || source.CompositionTarget == null) ? GetDpiByWin32(IntPtr.Zero) : new Dpi(96.0 * source.CompositionTarget.TransformToDevice.M11, 96.0 * source.CompositionTarget.TransformToDevice.M22);
+        }
+
+        #endregion
+
+        #region Win32 API
+
+        private const Int32 LOGPIXELSX = 88;
+        private const Int32 LOGPIXELSY = 90;
+
+        [DllImport("gdi32.dll")]
+        private static extern Int32 GetDeviceCaps(IntPtr hdc, Int32 index);
+
+        [DllImport("user32.dll")]
+        private static extern IntPtr GetDC(IntPtr hWnd);
+
+        [DllImport("user32.dll")]
+        private static extern Int32 ReleaseDC(IntPtr hWnd, IntPtr hDc);
+
+        public static Dpi GetDpiByWin32(IntPtr hwnd)
+        {
+            var hDc = GetDC(hwnd);
+
+            var dpiX = GetDeviceCaps(hDc, LOGPIXELSX);
+            var dpiY = GetDeviceCaps(hDc, LOGPIXELSY);
+
+            ReleaseDC(hwnd, hDc);
+            return new Dpi(dpiX, dpiY);
+        }
 
         #endregion
     }
