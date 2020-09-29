@@ -104,7 +104,7 @@
     </hc:Window.NonClientAreaContent>
     <DockPanel>
         <ToolBarTray DockPanel.Dock="Top">
-            <ToolBar ToolBarTray.IsLocked="True" Background="Transparent" Height="60" Margin="0" RadioButton.Checked="OnDrawToolChecked">
+            <ToolBar x:Name="toolbar" ToolBarTray.IsLocked="True" Background="Transparent" Height="60" Margin="0">
                 <RadioButton Style="{StaticResource Page.Styles.DrawTools}" attach:IconElement.Image="/Images/pointer1.png" attach:IconElement.ImageSelected="/Images/pointer2.png" Tag="Pointer" IsChecked="True">拾取</RadioButton>
                 <RadioButton Style="{StaticResource Page.Styles.DrawTools}" attach:IconElement.Image="/Images/pen1.png" attach:IconElement.ImageSelected="/Images/pen2.png" Tag="Pen">画笔</RadioButton>
                 <RadioButton Style="{StaticResource Page.Styles.DrawTools}" attach:IconElement.Image="/Images/eraser1.png" attach:IconElement.ImageSelected="/Images/eraser2.png" Tag="Eraser">橡皮</RadioButton>

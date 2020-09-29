@@ -160,11 +160,12 @@ namespace DrawTools
         {
             IDrawTool tool;
 
+            var point = e.GetPosition(this);
             for (var i = workingDrawTools.Count - 1; i >= 0; i--)
             {
                 tool = workingDrawTools[i];
 
-                if (tool.TouchId == 0 && tool.CanTouchEnter && (e.Handled = tool.OnTouchEnter(e.GetPosition(this))))
+                if (tool.TouchId == 0 && tool.CanTouchEnter && (e.Handled = tool.OnTouchEnter(point)))
                     return;
             }
         }
@@ -175,11 +176,12 @@ namespace DrawTools
 
             IDrawTool tool;
 
+            var point = e.GetPosition(this);
             for (var i = workingDrawTools.Count - 1; i >= 0; i--)
             {
                 tool = workingDrawTools[i];
 
-                if (tool.TouchId == 0 && tool.CanTouchLeave && (e.Handled = tool.OnTouchLeave(e.GetPosition(this))))
+                if (tool.TouchId == 0 && tool.CanTouchLeave && (e.Handled = tool.OnTouchLeave(point)))
                     return;
             }
         }
@@ -198,17 +200,18 @@ namespace DrawTools
 
             IDrawTool tool;
 
+            var point = e.GetPosition(this);
             for (var i = workingDrawTools.Count - 1; i >= 0; i--)
             {
                 tool = workingDrawTools[i];
 
-                if (tool.CanTouchDown && (e.Handled = tool.OnTouchDown(0, e.GetPosition(this))))
+                if (tool.CanTouchDown && (e.Handled = tool.OnTouchDown(0, point)))
                     return;
             }
 
             tool = CreateDrawingTool();
 
-            if (tool.CanTouchDown && (e.Handled = tool.OnTouchDown(0, e.GetPosition(this))))
+            if (tool.CanTouchDown && (e.Handled = tool.OnTouchDown(0, point)))
                 return;
 
             if (this.canDragStart)
@@ -254,11 +257,12 @@ namespace DrawTools
 
             IDrawTool tool;
 
+            var point = e.GetPosition(this);
             for (var i = workingDrawTools.Count - 1; i >= 0; i--)
             {
                 tool = workingDrawTools[i];
 
-                if (tool.TouchId == 0 && tool.CanTouchUp && (e.Handled = tool.OnTouchUp(e.GetPosition(this))))
+                if (tool.TouchId == 0 && tool.CanTouchUp && (e.Handled = tool.OnTouchUp(point)))
                     return;
             }
         }
@@ -298,7 +302,122 @@ namespace DrawTools
                 this.UpdateCursor();
         }
 
-        #endregion  
+        #endregion
+
+        #region 触摸事件
+
+        protected override void OnTouchEnter(TouchEventArgs e)
+        {
+            IDrawTool tool;
+
+            var point = e.GetTouchPoint(this).Position;
+            for (var i = workingDrawTools.Count - 1; i >= 0; i--)
+            {
+                tool = workingDrawTools[i];
+
+                if (tool.TouchId == e.TouchDevice.Id && tool.CanTouchEnter && (e.Handled = tool.OnTouchEnter(point)))
+                    return;
+            }
+        }
+
+        protected override void OnTouchLeave(TouchEventArgs e)
+        {
+            lastPoint = null;
+
+            IDrawTool tool;
+
+            var point = e.GetTouchPoint(this).Position;
+            for (var i = workingDrawTools.Count - 1; i >= 0; i--)
+            {
+                tool = workingDrawTools[i];
+
+                if (tool.TouchId == e.TouchDevice.Id && tool.CanTouchLeave && (e.Handled = tool.OnTouchLeave(point)))
+                    return;
+            }
+        }
+
+        protected override void OnTouchDown(TouchEventArgs e)
+        {
+            if (!this.IsKeyboardFocused)
+                this.Focus();
+
+            if (this.canDragStart)
+            {
+                lastPoint = e.GetTouchPoint(this.drawViewer).Position;
+                e.Handled = true;
+                return;
+            }
+
+            IDrawTool tool;
+
+            var point = e.GetTouchPoint(this).Position;
+            for (var i = workingDrawTools.Count - 1; i >= 0; i--)
+            {
+                tool = workingDrawTools[i];
+
+                if (tool.CanTouchDown && (e.Handled = tool.OnTouchDown(0, point)))
+                    return;
+            }
+
+            tool = CreateDrawingTool();
+
+            if (tool.CanTouchDown && (e.Handled = tool.OnTouchDown(0, point)))
+                return;
+
+            if (this.canDragStart)
+            {
+                lastPoint = point;
+                e.Handled = true;
+                return;
+            }
+        }
+
+        protected override void OnTouchMove(TouchEventArgs e)
+        {
+            if (this.canDragMove)
+            {
+                var drawPoint = e.GetTouchPoint(this.drawViewer).Position;
+                var dx = lastPoint.Value.X - drawPoint.X;
+                var dy = lastPoint.Value.Y - drawPoint.Y;
+                this.drawViewer.ScrollBy(dx, dy);
+                lastPoint = drawPoint;
+                e.Handled = true;
+                return;
+            }
+
+            var point = e.GetTouchPoint(this).Position;
+
+            if (point.X < 0 || point.Y < 0 || point.X > this.ActualWidth || point.Y > this.ActualHeight)
+                return;
+
+            IDrawTool tool;
+
+            for (var i = workingDrawTools.Count - 1; i >= 0; i--)
+            {
+                tool = workingDrawTools[i];
+
+                if (tool.TouchId == 0 && tool.CanTouchMove && (e.Handled = tool.OnTouchMove(point)))
+                    return;
+            }
+        }
+
+        protected override void OnTouchUp(TouchEventArgs e)
+        {
+            lastPoint = null;
+
+            IDrawTool tool;
+
+            var point = e.GetTouchPoint(this).Position;
+            for (var i = workingDrawTools.Count - 1; i >= 0; i--)
+            {
+                tool = workingDrawTools[i];
+
+                if (tool.TouchId == 0 && tool.CanTouchUp && (e.Handled = tool.OnTouchUp(point)))
+                    return;
+            }
+        }
+
+        #endregion
 
         #region 公开方法
 
@@ -473,7 +592,7 @@ namespace DrawTools
                     this.squareCursor = false;
                     break;
                 default:
-                    if (squareCursor && cursorLength == StrokeThickness && cursorZoom == Zoom)
+                    if ((squareCursor && cursorLength == StrokeThickness && cursorZoom == Zoom) || Double.IsNaN(StrokeThickness) || Double.IsNaN(Zoom))
                         break;
                     var w = (UInt32)Math.Max(1, StrokeThickness * Zoom);
                     var h = (UInt32)Math.Max(1, StrokeThickness * Zoom);

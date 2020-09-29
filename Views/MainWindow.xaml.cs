@@ -19,6 +19,8 @@ namespace DrawTools.Views
 
             color_picker.SelectedColorChanged += delegate { this.drawCanvas.Brush = color_picker.SelectedBrush; btn_color.IsChecked = false; };
             color_picker.Canceled += delegate { btn_color.IsChecked = false; };
+
+            this.toolbar.AddHandler(RadioButton.CheckedEvent, new RoutedEventHandler(OnDrawToolChecked));
         }
 
         private void OnDrawToolChecked(Object sender, RoutedEventArgs e)
