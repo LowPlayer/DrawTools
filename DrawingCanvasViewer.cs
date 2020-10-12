@@ -203,8 +203,8 @@ namespace DrawTools
             }
             else
             {
-                center.X = scrollViewer.HorizontalOffset / (this.InnerWidth - scrollViewer.ActualWidth);
-                center.Y = scrollViewer.VerticalOffset / (this.InnerHeight - scrollViewer.ActualHeight);
+                center.X = (this.InnerWidth == scrollViewer.ActualWidth) ? 0 : scrollViewer.HorizontalOffset / (this.InnerWidth - scrollViewer.ActualWidth);
+                center.Y = (this.InnerHeight == scrollViewer.ActualHeight) ? 0 : scrollViewer.VerticalOffset / (this.InnerHeight - scrollViewer.ActualHeight);
             }
         }
 
