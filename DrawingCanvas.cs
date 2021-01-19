@@ -14,6 +14,7 @@ using System.Xml.Serialization;
 
 namespace DrawTools
 {
+    [ContentProperty]
     public sealed class DrawingCanvas : Canvas
     {
         public DrawingCanvas()
